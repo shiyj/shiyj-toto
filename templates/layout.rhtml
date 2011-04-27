@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+  	<link rel="stylesheet" type="text/css" href="/css/application.css">
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css">
+    <link rel="alternate" type="application/atom+xml" title="<%= title %> - feed" href="/index.xml" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
+    <title><%= title %></title>
+  </head>
+  <body>
+    <div id="container">
+      <div id="header">
+        <h3><a  href="/">Shiyj in Ruby</a></h3><img src="/images/ruby.png" height="100"></img>
+        <ul>
+          <li><a href="/archives" class="nav">Blog</a></li>
+          <li><a href="/about" class="page_link">About</a></li>
+        </ul>
+      </div>
+
+
+      <div id="main" class="clearfix">
+        <%= yield %>
+      </div>
+
+      <div id="footer" class="clearfix">
+        &copy; 史英建 | <a href="http://github.com/">源代码</a>
+      </div>
+
+    </div>
+  </body>
+</html>
+

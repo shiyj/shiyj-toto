@@ -1,0 +1,38 @@
+<article class="post clearfix">
+  <header class="post_header">
+    <h3 class="post_title"><a href="<%= article.path %>"><%= article.title %></a></h3>
+    <div class="post_info info">
+    作者：<span class="post_at"><%= article.author %></span> | 
+    	发表于：<span class="post_at"><%= Date.parse(article.date).strftime("%Y-%m-%d")%></span>  |  标签：<% article.tags.each do |tag|%><a href="/tag/<%=tag%>" class="tag"><%=tag%></a>&nbsp;<%end%>
+    </div>
+  </header>
+
+  <section class="post_body body">
+    <%= body %>
+  </section>
+
+  <section id="comment_form" class="comment_form clearfix">
+    <% if @config[:disqus] %>
+      <div id="disqus_thread"></div>
+      <script type="text/javascript">
+      /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+      var disqus_shortname = "<%= @config[:disqus] %>"; // required: replace example with your forum shortname
+      <% if ENV['RACK_ENV'] == 'development' %>
+        var disqus_developer = 1;
+      <% end %>
+      // The following are highly recommended additional parameters. Remove the slashes in front to use.
+      // var disqus_identifier = 'unique_dynamic_id_1234';
+      // var disqus_url = 'http://example.com/permalink-to-page.html';
+      /* * * DON'T EDIT BELOW THIS LINE * * */
+      (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = "http://<%= @config[:disqus] %>.disqus.com/embed.js";
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+      </script>
+      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <% end %>
+    
+  </section>
+</article>
+
