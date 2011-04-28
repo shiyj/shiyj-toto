@@ -1,0 +1,27 @@
+--- 
+slug: git
+author: 史英建
+title: Agent admitted failure to sign using the key 
+date: 28/04/2011
+
+使用:
+
+    ssh-keygen -t rsa -C "your_email@youremail.com"
+
+产生出 id_rsa, id_rsa.pub, 后用    ssh git@github.com    连线时却出现下述讯息:
+
+    Agent admitted failure to sign using the key
+    Permission denied (publickey).
+
+解法
+
+于自己的机器上, 执行 ssh-add, 会出现下述讯息.
+
+    Identity added: /home/user/.ssh/id_rsa (/home/user/.ssh/id_rsa)
+
+再次连线就正常了~
+    
+    PTY allocation request failed on channel 0
+    Hi shiyj! You've successfully authenticated, but GitHub does not provide shell access.
+    Connection to github.com closed.
+
