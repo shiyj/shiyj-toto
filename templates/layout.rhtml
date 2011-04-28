@@ -9,22 +9,28 @@
     <title><%= title %></title>
   </head>
   <body>
+  		
     <div id="container">
       <div id="header">
         <h3><a  href="/">Shiyj in Ruby</a></h3><img src="/images/ruby.png" height="100"></img>
         <ul>
-          <li><a href="/archives" class="nav">Blog</a></li>
-          <li><a href="/about" class="page_link">About</a></li>
+          <li><a href="/archives" class="nav">日志</a></li>
+          <li><a href="/about" class="page_link">关于我</a></li>
         </ul>
       </div>
-
-
-      <div id="main" class="clearfix">
-        <%= yield %>
-      </div>
-
+      
+     
+			<div id="main" class="clearfix">
+		    <div id="yieldfield">
+		      <%= yield %>
+		    </div>
+				<div id="webleft">
+					<embed src="/images/time.swf" wmode="transparent" width="200px" height="100px"></embed>
+					<iframe frameborder="0" scrolling="no" src="http://v.t.qq.com/show/show.php?n=giszzu&w=202&h=552&fl=1&l=2&o=29&c=1&si=e9d8d3d76e7861abaf728b6778b40fc997220bc8" width="202" height="552"></iframe>
+				</div>
+			</div>
       <div id="footer" class="clearfix">
-        &copy; 史英建 | <a href="http://github.com/">源代码</a>
+        &copy; 史英建 | <a href="http://github.com/shiyj">源代码</a>|<a href="/about">关于我</a>
       </div>
 
     </div>

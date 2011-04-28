@@ -31,7 +31,7 @@ url有点麻烦啊<http://www.google.com>
     * cb
         * cba
 
-其实代码还有另一种写法(四个空格):
+    其实代码还有另一种写法(四个空格):
 
     abcdefghijklmn
 ruby代码:
@@ -40,4 +40,7 @@ ruby代码:
     def a
     #aaa
     end
+    
+    
+<p>Use the <code>printf()</code> function.</p>
 
