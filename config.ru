@@ -9,7 +9,7 @@ if ENV['RACK_ENV'] == 'development'
   use Rack::ShowExceptions
 end
 # Syntax Highlighting
-require 'coderay'
+#require 'coderay'
 require 'rack/codehighlighter'
 use Rack::Codehighlighter, :coderay, :markdown => true, 
   :theme => "active4d", :lines => true, :element => "pre>code", 
