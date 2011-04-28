@@ -1,0 +1,8 @@
+--- 
+slug: test
+author: 史英建
+title: test
+date: 28/04/2011
+
+在此处以下输入博客内容.
+

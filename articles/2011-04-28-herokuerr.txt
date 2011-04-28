@@ -1,0 +1,20 @@
+--- 
+slug: herokuerr
+author: 史英建
+title: heroku Application Error
+date: 28/04/2011
+
+将代码push到heroku中后出现下面错误:
+
+
+##Application Error
+
+An error occurred in the application and your page could not be served. Please try again in a few moments.
+
+If you are the application owner, check your logs for details.
+
+可以使用命令:
+
+    heroku logs
+
+查看具体到问题.

@@ -7,10 +7,16 @@ task :default => :new
 desc "Create a new article."
 task :new do
   url =ask('Url:')
+  title=ask('Title:')
   #slug = title.empty?? nil : title.strip.slugize
   slug = url.empty?? nil : url.strip.slugize
-  
-  article = {'title' => '','author'=>'史英建', 'date' => Time.now.strftime("%d/%m/%Y"),'slug'=>slug}.to_yaml
+  article = "--- \n"
+  hash = {'title' => title,
+          'date' => Time.now.strftime("%d/%m/%Y"),
+          'slug' => slug,
+          'author' => "史英建"}
+  hash.each{|key,value| article << ("#{key}: #{value}\n")}
+  #article = {'title' => '','author'=>'史英建', 'date' => Time.now.strftime("%d/%m/%Y")}.to_yaml
   article << "\n"
   article << "在此处以下输入博客内容.\n\n"
 
