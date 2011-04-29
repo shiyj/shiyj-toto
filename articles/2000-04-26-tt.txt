@@ -1,0 +1,46 @@
+--- 
+slug: tt
+author: 史英建
+title: 中文标题
+date: 26/04/2011
+
+新的标题.
+
+##井号作用
+#然后?
+
+###三个试试是啥.
+
+####四个试试是啥.
+[google][1] is a website.
+
+[1]: http://www.google.com "google"
+
+url有点麻烦啊<http://www.google.com>
+
+还应该有排版,一个空格和回车真的有这么大作用啊:
+
+* a
+    * aa
+    * ab
+* b
+    * ba
+    * bb
+* c
+    * ca
+    * cb
+        * cba
+
+    其实代码还有另一种写法(四个空格):
+
+    abcdefghijklmn
+ruby代码:
+
+    :::ruby
+    def a
+    #aaa
+    end
+    
+    
+<p>Use the <code>printf()</code> function.</p>
+

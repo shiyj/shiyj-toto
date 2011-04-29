@@ -1,0 +1,38 @@
+--- 
+slug: taint
+author: 史英建
+title: ruby taint 对象污染机制
+date: 29/04/2011
+tags: ruby taint
+
+ruby中的对象调用taint方法将其设置成"污染"的.如果一个对象被设置为taint,那么源自它的所以对象都被设置为taint了.
+
+在举例子之前先要说明下:类本身也是一个对象,是具有创建新对象能力的对象.
+
+    :::ruby
+    class FileLoader
+     def load
+       @obj="2011-04-26-tt.txt"
+    	 text =File.read(@obj)
+       self.taint
+       puts text
+     end
+     def putout
+    	 str=self.tainted? ?  "load successfull!" :  "load faild!"
+    	 puts str
+     end
+    end
+
+    fl1=FileLoader.new
+    fl1.load
+    fl1.putout #load successfull!
+    fl2=FileLoader.new
+    fl2.putout #load faild!
+
+
+说明:tainted?是用?方法来返回true or false,第二个?是三目运算符.
+
+
+上边例子说明污染机制通俗地说就是一个"标记".将某个值和状态改变后把整个对象标记为"污染",然后它可以"传染"给由它生成的其他对象也都"被"污染了.
+
+当然有污染就有去除污染的方法.ruby还提供了untaint来"治疗"污染.具体使用方法不再赘述.

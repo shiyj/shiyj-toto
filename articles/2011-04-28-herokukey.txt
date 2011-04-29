@@ -3,6 +3,7 @@ slug: herokukey
 author: 史英建
 title: heroku中添加公钥
 date: 28/04/2011
+tags: heroku github git
 
 代码如下:
 

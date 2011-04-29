@@ -39,6 +39,57 @@ blockquote {
   padding: 5px;
 }
 
+blockquote:after {
+  position: absolute;
+  content: "“Quote”";
+  font-size: 30px;
+  font-weight: bold;
+  font-family: serif;
+  color: rgba(44, 44, 34, 0.37);
+  top: 7px;
+  right: 5px;
+}
+::selection {
+  background: rgba(44, 44, 44, 0.94);
+  color: #FFFFFF;
+}
+::-moz-selection {
+  background: rgba(44, 44, 44, 0.94);
+  color: #FFFFFF;
+}
+
+.rounded {
+  display: inline-block;
+  -moz-background-size: 100% 100%;
+  -moz-border-radius: 7px;
+  -moz-box-shadow: 0 2px 5px #777777;
+  -webkit-border-radius: 7px;
+  -webkit-box-shadow: 0 2px 5px #777777;
+  -webkit-background-size: 100% 100%;
+  border-radius: 7px;
+  box-shadow: 0 2px 5px #777777;
+  background-size: 100% 100%;
+}
+.rounded img {
+  opacity: 0;
+}
+
+pre.twilight {
+  position: relative;
+  white-space: pre-wrap;
+  padding: 5px;
+  font-size: 12px;
+  font-family: monospace;
+  opacity: 0.88;
+}
+pre.twilight:after {
+  position: absolute;
+  content: "*CODE*";
+  font-size: 30px;
+  color: rgba(44, 44, 44, 0.37);
+  top: 7px;
+  right: 5px;
+}
 
 .clearfix {
   clear: both;
@@ -183,7 +234,7 @@ blockquote {
  */
 #main {
   padding: 27px 0;
-  min-height: 400px;
+  /*min-height: 400px;*/
   line-height: 1.4em;
   width:735;
   float:left;
