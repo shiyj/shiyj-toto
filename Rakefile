@@ -1,4 +1,6 @@
 require 'toto'
+require 'coderay'
+require 'rack/codehighlighter'
 
 @config = Toto::Config::Defaults
 

@@ -4,10 +4,12 @@ require 'extends'
 # Syntax Highlighting
 require 'coderay'
 require 'rack/codehighlighter'
-use Rack::Codehighlighter, :coderay, :markdown => true, 
-  :theme => "active4d", :lines => true, :element => "pre>code", 
-  :pattern => /\A:::(\w+)\s*(\n|&#x000A;)/, :logging => true
+#use Rack::Codehighlighter, :coderay, :markdown => true, 
+#  :theme => "active4d", :lines => true, :element => "pre>code", 
+#  :pattern => /\A:::(\w+)\s*(\n|&#x000A;)/, :logging => true
 
+CodeRay::Encoders["html"]::DEFAULT_OPTIONS[:line_numbers]=:inline
+use Rack::Codehighlighter, :coderay, :element => "pre>code", :pattern => /\A:::(\w+)\s*\n/
 # Rack config
 use Rack::Static, :urls => ['/css', '/js', '/images', '/favicon.ico'], :root => 'public'
 use Rack::CommonLogger
