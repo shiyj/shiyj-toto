@@ -5,7 +5,9 @@ title: heroku中添加公钥
 date: 28/04/2011
 tags: heroku github git
 
-代码如下:
+总是遇到ssk出问题的事情如:
+    Permission denied (publickey)
+每次都重新生成阿啥的,结果忘记把keys给添加上.代码如下:
 
     heroku keys
-
+留作提醒.

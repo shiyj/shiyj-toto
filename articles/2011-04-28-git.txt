@@ -3,7 +3,7 @@ slug: git
 author: 史英建
 title: Agent admitted failure to sign using the key 
 date: 28/04/2011
-tags: git ssk
+tags: git ssh
 
 使用:
 

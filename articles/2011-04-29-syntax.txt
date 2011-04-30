@@ -1,38 +1,92 @@
 --- 
 slug: syntax
 author: 史英建
-title: syntax highlighting
+title: 神奇的.gems
 date: 29/04/2011
+tags: heroku gems
 
-在heroku 中托管项目后出现
-
-##Application Error
-
-查看日志如下:
-
-
-		/usr/ruby1.8.7/lib/ruby/site_ruby/1.8/rubygems/custom_require.rb:31:in `gem_original_require': no such file to load -- coderay (LoadError)
-		2011-04-29T08:44:52+00:00 app[web.1]: 	from /usr/ruby1.8.7/lib/ruby/site_ruby/1.8/rubygems/custom_require.rb:31:in `require'
-		2011-04-29T08:44:52+00:00 app[web.1]: 	from config.ru:4
-		2011-04-29T08:44:52+00:00 app[web.1]: 	from /home/heroku_rack/heroku.ru:23
-		2011-04-29T08:44:52+00:00 app[web.1]: 	from /usr/ruby1.8.7/lib/ruby/gems/1.8/gems/rack-1.0.1/lib/rack/builder.rb:29:in `instance_eval'
-		2011-04-29T08:44:52+00:00 app[web.1]: 	from /usr/ruby1.8.7/lib/ruby/gems/1.8/gems/rack-1.0.1/lib/rack/builder.rb:29:in `initialize'
-
-
-注意第三行: from config.ru:4
-
-这是问题所在.查看源代码如下:
-
+在heroku 中托管项目如何才能把自己所需要的gem包install了呢?
+例如:在我们本机开发时需要用到 coderay和rake-codehighlighter这两个gem.那么直接使用 gem install coderay 和 gem install rack-codehighlighter 就行了.然后再在项目中使用
     :::ruby
+    require 'coderay'
+    require 'rack/codehighlighter'
+
+将这两个包加载到程序中就行了.可是部署到heroku中却出现问题:`gem_original_require': no such file to load -- coderay (LoadError),如下:
+
+		2011-04-30T02:13:37+00:00 app[web.1]: /usr/ruby1.8.7/lib/ruby/site_ruby/1.8/rubygems/custom_require.rb:31:in `gem_original_require': no such file to load -- coderay (LoadError)
+		2011-04-30T02:13:37+00:00 app[web.1]: 	from /usr/ruby1.8.7/lib/ruby/site_ruby/1.8/rubygems/custom_require.rb:31:in `require'
+		2011-04-30T02:13:37+00:00 app[web.1]: 	from config.ru:5
+		2011-04-30T02:13:37+00:00 app[web.1]: 	from /home/heroku_rack/heroku.ru:23
+		2011-04-30T02:13:37+00:00 app[web.1]: 	from /usr/ruby1.8.7/lib/ruby/gems/1.8/gems/rack-1.0.1/lib/rack/builder.rb:29:in `instance_eval'
+		2011-04-30T02:13:37+00:00 app[web.1]: 	from /usr/ruby1.8.7/lib/ruby/gems/1.8/gems/rack-1.0.1/lib/rack/builder.rb:29:in `initialize'
+		2011-04-30T02:13:37+00:00 app[web.1]: 	from /usr/ruby1.8.7/lib/ruby/gems/1.8/gems/rack-1.0.1/lib/rack/builder.rb:46:in `new'
+		2011-04-30T02:13:37+00:00 app[web.1]: 	from /usr/ruby1.8.7/lib/ruby/gems/1.8/gems/rack-1.0.1/lib/rack/builder.rb:46:in `map'
+		2011-04-30T02:13:37+00:00 app[web.1]: 	from /home/heroku_rack/heroku.ru:18
+		2011-04-30T02:13:37+00:00 app[web.1]: 	from /usr/ruby1.8.7/lib/ruby/gems/1.8/gems/rack-1.0.1/lib/rack/builder.rb:29:in `instance_eval'
+		2011-04-30T02:13:37+00:00 app[web.1]: 	from /usr/ruby1.8.7/lib/ruby/gems/1.8/gems/rack-1.0.1/lib/rack/builder.rb:29:in `initialize'
+		2011-04-30T02:13:37+00:00 app[web.1]: 	from /home/heroku_rack/heroku.ru:11:in `new'
+
+
+原来在本地安装了并不一定在heroku中也安装.google了一下,发现了一个神奇的文件 : .gems
+
+.gems文件可以告诉heroku你要安装那些文件.具体实现方法:
+
+在项目的根目录下应该有一个隐藏文件 .gems文件,没有的话新建一个.然后在里边输入需要install的gem包.我的如下:
+
+    builder
+    rdiscount
+    toto
+    coderay
+    rack-codehighlighter
     
-		require 'toto'
-		require 'extends'
-		# Syntax Highlighting
-		require 'coderay'
-		require 'rack/codehighlighter'
-		use Rack::Codehighlighter, :coderay, :markdown => true, 
-		  :theme => "active4d", :lines => true, :element => "pre>code", 
-		  :pattern => /\A:::(\w+)\s*(\n|&#x000A;)/, :logging => true
-		
-第四行是 require 'coderay'.说明coderay库加载有问题.将其注释掉即可.
+当然后边还有一些其他选项,具体可以参考这里:<http://devcenter.heroku.com/articles/gemmanifest>
+
+然后用git命令将其push到heroku上.
+
+    git add .gems
+    git commit -m "add gems"
+    git push heroku master
+    
+运行结果如下:
+
+    Counting objects: 8, done.
+    Delta compression using up to 2 threads.
+		Compressing objects: 100% (6/6), done.
+		Writing objects: 100% (6/6), 563 bytes, done.
+		Total 6 (delta 2), reused 0 (delta 0)
+
+		-----> Heroku receiving push
+		-----> Rack app detected
+
+		-----> Installing gem builder from http://rubygems.org
+				   Successfully installed builder-3.0.0
+				   1 gem installed
+
+		-----> Installing gem rdiscount from http://rubygems.org
+				   Building native extensions.  This could take a while...
+				   Successfully installed rdiscount-1.6.8
+				   1 gem installed
+
+		-----> Installing gem toto from http://rubygems.org
+				   Successfully installed toto-0.4.9
+				   1 gem installed
+
+		-----> Installing gem coderay from http://rubygems.org
+				   Successfully installed coderay-0.9.7
+				   1 gem installed
+
+		-----> Installing gem rack-codehighlighter from http://rubygems.org
+				   Building native extensions.  This could take a while...
+				   Successfully installed nokogiri-1.4.4
+				   Successfully installed rack-codehighlighter-0.4.7
+				   2 gems installed
+
+				   Compiled slug size is 2.5MB
+		-----> Launching... done
+				   http://shiyj.heroku.com deployed to Heroku
+
+		To git@heroku.com:shiyj.git
+			 f8fa0b1..a1f41c9  master -> master
+
+再次刷新,程序可以运行了.
 

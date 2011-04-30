@@ -1,4 +1,3 @@
-
 require 'toto'
 require 'extends'
 # Syntax Highlighting

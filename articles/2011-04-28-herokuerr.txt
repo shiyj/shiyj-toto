@@ -19,3 +19,33 @@ If you are the application owner, check your logs for details.
     heroku logs
 
 查看具体到问题.
+查看日志如下:
+
+
+		/usr/ruby1.8.7/lib/ruby/site_ruby/1.8/rubygems/custom_require.rb:31:in `gem_original_require': no such file to load -- coderay (LoadError)
+		2011-04-29T08:44:52+00:00 app[web.1]: 	from /usr/ruby1.8.7/lib/ruby/site_ruby/1.8/rubygems/custom_require.rb:31:in `require'
+		2011-04-29T08:44:52+00:00 app[web.1]: 	from config.ru:4
+		2011-04-29T08:44:52+00:00 app[web.1]: 	from /home/heroku_rack/heroku.ru:23
+		2011-04-29T08:44:52+00:00 app[web.1]: 	from /usr/ruby1.8.7/lib/ruby/gems/1.8/gems/rack-1.0.1/lib/rack/builder.rb:29:in `instance_eval'
+		2011-04-29T08:44:52+00:00 app[web.1]: 	from /usr/ruby1.8.7/lib/ruby/gems/1.8/gems/rack-1.0.1/lib/rack/builder.rb:29:in `initialize'
+
+
+注意第三行: from config.ru:4
+
+这是问题所在.查看源代码如下:
+
+    :::ruby
+    
+		require 'toto'
+		require 'extends'
+		# Syntax Highlighting
+		require 'coderay'
+		require 'rack/codehighlighter'
+		use Rack::Codehighlighter, :coderay, :markdown => true, 
+		  :theme => "active4d", :lines => true, :element => "pre>code", 
+		  :pattern => /\A:::(\w+)\s*(\n|&#x000A;)/, :logging => true
+		
+第四行是 require 'coderay'.说明coderay库加载有问题.将其注释掉即可.
+
+可是为什么会出现这个问题呢?难道heroku找不到coderay这个库吗?请看[这里:神奇的.gems][1]
+[1]: /2011/04/29/syntax/ "这里:神奇的.gems"
