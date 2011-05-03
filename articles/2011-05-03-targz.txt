@@ -1,0 +1,20 @@
+--- 
+slug: targz
+author: 史英建
+title: tar.gz 文件打开失败.
+date: 03/05/2011
+
+从网站上下载大 a.tar.gz 文件打开时提示:
+
+    gzip: stdin: not in gzip format 
+    tar: Child returned status 1 
+    tar: Exiting with failure status due to previous errors
+    
+格式错误,使用file命令查看,显示如下:
+
+    file a.tar.gz
+    bzip2 compressed data ,block = 900k
+
+使用如下命令即可:
+
+    bunzip2 a.tar.gz
