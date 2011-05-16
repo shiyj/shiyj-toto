@@ -1,0 +1,32 @@
+--- 
+slug: chapt1
+author: 史英建
+title: A Pragmatic Philosophy
+date: 16/05/2011
+
+##Chapter 1
+###A Pragmatic Philosophy
+
+What distinguishes Pragmatic Programmers? We feel it's an attitude,a style,a philosophy of approaching problems and their solutions . They think
+ beyond the immediate problems , always trying to place it in its larger context, always trying be aware of the bigger picture .
+ 
+ 
+ Pragmatic programming stems from a philosophy of pragmatic thinking!
+ 
+ 
+ ####The cat ate my source code ?!
+ 
+ A pragmatic programmer takes charge of his or her own career, and isn't afraid to admit ignorance or error.
+ We can be proud of our abilities, but we must be honest about our shortcomings--our ignorance as well as our  mistakes.
+ 
+ so remmeber that :
+ 
+ The greatest of all weakness is the fear of appearing weak.
+ 
+ 
+ Provide Options, Don't Make Lame Excuses.
+ Before you go and tell your boss or someone else why something can't be dan,is late,or is broken,stop and ask yourself: is there anything else you can try? 
+ Sometimes,you just know what they are goning to say, so save them the trouble.
+
+
+Don't say it can't be done; explain what can be done to salvage the situation. Does code have to be throw out?

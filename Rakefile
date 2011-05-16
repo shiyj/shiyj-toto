@@ -1,6 +1,4 @@
 require 'toto'
-require 'coderay'
-require 'rack/codehighlighter'
 
 @config = Toto::Config::Defaults
 
@@ -21,6 +19,7 @@ task :new do
   #article = {'title' => '','author'=>'史英建', 'date' => Time.now.strftime("%d/%m/%Y")}.to_yaml
   article << "\n"
   article << "在此处以下输入博客内容.\n\n"
+  article << "Powered by Engin & toto"
 
   path = "#{Toto::Paths[:articles]}/#{Time.now.strftime("%Y-%m-%d")}#{'-' + slug if slug}.#{@config[:ext]}"
 
