@@ -6,3 +6,7 @@ date: 28/04/2011
 
 在此处以下输入博客内容.
 
+
+
+Powered by [Engin](/about) & toto
+

@@ -3,8 +3,9 @@ slug: targz
 author: 史英建
 title: tar.gz 文件打开失败.
 date: 03/05/2011
+tags: tar file
 
-从网站上下载大 a.tar.gz 文件打开时提示:
+从网站上下载的 a.tar.gz 文件打开时提示:
 
     gzip: stdin: not in gzip format 
     tar: Child returned status 1 
@@ -18,3 +19,7 @@ date: 03/05/2011
 使用如下命令即可:
 
     bunzip2 a.tar.gz
+
+
+
+Powered by [Engin](/about) & toto

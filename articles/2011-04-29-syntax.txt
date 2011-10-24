@@ -90,3 +90,7 @@ tags: heroku gems
 
 再次刷新,程序可以运行了.
 
+
+
+Powered by [Engin](/about) & toto
+

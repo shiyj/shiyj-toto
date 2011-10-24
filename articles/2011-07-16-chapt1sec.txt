@@ -1,0 +1,30 @@
+--- 
+title: software entropy
+date: 16/07/2011
+slug: chapt1sec
+author: 史英建
+
+###1.2 Software Entropy
+
+while software development is immune from almost all physical laws, entropy hits us head.
+Entropy is a term frome physics that refers to the amount of "disorder" in a system. Unfortunately, the law of thermodynamics guarantee that the 
+entropy in the universe tends toward a maximum. When disorder increase in software, programmers called it "software rot".
+
+There are many factors that can contribute to software rot. The most important one seems to be the psychology, or culture, at work on a project.
+
+
+In inner cities, some building are beautiful and clean, while others are rotting hulks. Why? Researchers in the field of crime and urban decay discovered a fascinating trigger mechanism, one that 
+very quickly turns a clean, intact, inhabited building into a smashed and abandoned derelict.
+
+#### A broken windows
+
+one broken window, left unrepaired for any substantial length of time,instills in the inhabitants of the building a sense of abandonment--a sense that the powers that don't care about the building.So 
+another windows gets broken. People start littering.In a relatively short space of time, the building becomes demaged beyond the oner's desire to fix it,and the sense of abandonment becomes reality.
+
+Don't leave "broken windows" (bed designs,wrong decisions,or poor code) unrepaired.Fix each one as soon as it is discovered.Perhaps you can comment out the offending code,or display a "Not Implemented"
+ message ,or substitute dummy data instead. Take some action to prevent further damage and to show that you're on top of the situation.
+
+
+
+
+Powered by [Engin](/about) & toto

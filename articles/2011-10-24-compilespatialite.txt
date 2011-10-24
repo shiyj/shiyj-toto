@@ -1,0 +1,29 @@
+--- 
+title: 编译spatialite-GIS
+date: 24/10/2011
+slug: compilespatialite
+author: 史英建
+tags: GIS spatialite
+
+##编译spatialite—GIS
+
+
+在ubuntugis包中的libspatialite-dev使用的是2.4.0-rc4-2，然而如果要编译
+spatialite-GIS,需要librasterlite，而librasterlite的编译依赖libspatialite-dev，且必须在2.3.1稳定版本中才行。
+否则会出现诸如：
+
+	rasterlite_load.c:896:27: error: ‘GAIA_WAVELET_BLOB’ undeclared (first use in this function) 
+的错误。另外在Debian/Ubuntu 包中libspatialite依赖的proj和geos位置并不一定是	./configure 后默认的/usr/local/lib（我的是/usr/lib，可以搜索/usr看看你的是在什么地方）,
+不止lib位置，include位置也略有不同。例如
+	#include <geotiff.h>
+需要改为
+	#include <geotiff/geotiff.h>
+总之，在make时遇到“不存在文件或路径”这样的错误时就在/usr下搜索，看其具体位置再引用。
+以上在google group邮件列表中也有说明：<http://groups.google.com/group/spatialite-users/browse_thread/thread/2916d001ec7ed776>
+
+还有就是源文件中这一句代码是错的，
+	void ZoomTo(double minx, double minx, double maxx, double maxy);
+修改第二个minx为miny就可以了。
+
+
+Powered by [Engin](/about) & toto

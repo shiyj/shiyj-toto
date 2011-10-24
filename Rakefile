@@ -1,5 +1,6 @@
+# encoding: utf-8
 require 'toto'
-
+#require 'extends'
 @config = Toto::Config::Defaults
 
 task :default => :local
@@ -14,12 +15,12 @@ task :new do
   hash = {'title' => title,
           'date' => Time.now.strftime("%d/%m/%Y"),
           'slug' => slug,
-          'author' => "史英建"}
+          'author' => "史英建" }
   hash.each{|key,value| article << ("#{key}: #{value}\n")}
   #article = {'title' => '','author'=>'史英建', 'date' => Time.now.strftime("%d/%m/%Y")}.to_yaml
   article << "\n"
-  article << "在此处以下输入博客内容.\n\n"
-  article << "Powered by Engin & toto"
+  article << "###{title}\n\n\n\n"
+  article << "Powered by [Engin](/about) & toto"
 
   path = "#{Toto::Paths[:articles]}/#{Time.now.strftime("%Y-%m-%d")}#{'-' + slug if slug}.#{@config[:ext]}"
 
@@ -38,6 +39,7 @@ task :publish do
   toto "publishing your article(s)..."
   `git push heroku master`
   `git push origin master`
+  toto "finished!"
 end
 
 desc "Publish the blog locally."

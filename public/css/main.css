@@ -6,7 +6,7 @@
 
 #webleft{
 	width:202px;
-	height:552px;
+	height:950px;
 	float:right;
 }
 
@@ -186,8 +186,7 @@ pre.twilight:after {
 #header ul li a:hover {
   background: rgba(4, 4, 4, 0.77);
 }
-#header ul li a.current {
-  background: rgba(4, 4, 4, 0.77);
+#header ul li a.curren, 4, 0.77);
   color: #FFFFFF;
   -moz-box-shadow: 0 0 7px #333333;
   -webkit-box-shadow: 0 0 7px #333333;

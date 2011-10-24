@@ -11,12 +11,11 @@ What distinguishes Pragmatic Programmers? We feel it's an attitude,a style,a phi
  beyond the immediate problems , always trying to place it in its larger context, always trying be aware of the bigger picture .
  
  
- Pragmatic programming stems from a philosophy of pragmatic thinking!
- 
- 
- ####The cat ate my source code ?!
- 
- A pragmatic programmer takes charge of his or her own career, and isn't afraid to admit ignorance or error.
+ Pragmatic programming stems from a philosophy of pragmatic thinking! 
+
+###1.1 The cat ate my source code ?!
+
+A pragmatic programmer takes charge of his or her own career, and isn't afraid to admit ignorance or error.
  We can be proud of our abilities, but we must be honest about our shortcomings--our ignorance as well as our  mistakes.
  
  so remmeber that :
@@ -30,3 +29,7 @@ What distinguishes Pragmatic Programmers? We feel it's an attitude,a style,a phi
 
 
 Don't say it can't be done; explain what can be done to salvage the situation. Does code have to be throw out?
+
+
+
+Powered by [Engin](/about) & toto

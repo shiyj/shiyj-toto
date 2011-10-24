@@ -48,4 +48,9 @@ If you are the application owner, check your logs for details.
 第四行是 require 'coderay'.说明coderay库加载有问题.将其注释掉即可.
 
 可是为什么会出现这个问题呢?难道heroku找不到coderay这个库吗?请看[这里:神奇的.gems][1]
-[1]: /2011/04/29/syntax/ "这里:神奇的.gems"
+[1]: /2011/04/29/syntax/ "神奇的.gems"
+
+
+
+
+Powered by [Engin](/about) & toto
