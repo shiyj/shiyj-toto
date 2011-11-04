@@ -17,9 +17,14 @@ tags: ubuntu
 把id_rsa.pub内容加入到github中。
 
 
-###2 gcc
+###2 c/c++开发环境
 
 	sudo apt-get  install  build-essential
+####安装ide Code::Blocks及图形界面wxwidgets
+
+	sudo apt-get install build-essential
+	sudo apt-get install codeblocks-contrib
+	sudo apt-get install libwxgtk2.8-dev
 
 ###3 openssl
 
@@ -31,7 +36,7 @@ tags: ubuntu
 	sudo apt-get install libx11-dev
 
 
-###5 Ubuntu GIS
+###5 Ubuntu GIS源
 
 	deb http://ppa.launchpad.net/ubuntugis/ppa/ubuntu lucid main 
 	deb-src http://ppa.launchpad.net/ubuntugis/ppa/ubuntu lucid main 
@@ -71,6 +76,10 @@ tags: ubuntu
 	extension=mongo.so
 
 ###8 编译node.js。
+
+	sudo apt-get install libexpat1-dev
+
+####npm安装
 
 ###9 wine中文配置
 

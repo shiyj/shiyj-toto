@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'toto'
 require './extends'
 # Syntax Highlighting

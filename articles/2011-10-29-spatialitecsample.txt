@@ -1,0 +1,164 @@
+--- 
+title: spatialite c samples 解析
+date: 29/10/2011
+slug: spatialitecsample
+author: 史英建
+tags: spatialite
+
+---
+##**spatialite c samples 解析**
+---
+####0.初始化spatialite扩展
+由于spatialite是基于sqlite的扩展，所以在使用sqlite查询之前要先将sqatilate初始化。
+代码如下
+	spatialite_init(0);
+####1.连接数据库
+
+sqlite提供的连接数据库方法有三个：
+
+	:::c
+	int sqlite3_open(
+		const char *filename,   /* Database filename (UTF-8) */
+		sqlite3 **ppDb          /* OUT: SQLite db handle */
+	);
+	int sqlite3_open16(
+		const void *filename,   /* Database filename (UTF-16) */
+		sqlite3 **ppDb          /* OUT: SQLite db handle */
+	);
+	int sqlite3_open_v2(
+	  const char *filename,   /* Database filename (UTF-8) */
+	  sqlite3 **ppDb,         /* OUT: SQLite db handle */
+	  int flags,              /* Flags */
+	  const char *zVfs        /* Name of VFS module to use */
+	);
+
+数据库连接被放在在 *ppDb内，其他的查询操作可以通过它来找到所连接数据库。如果连接成功那么函数返回SQLITE_OK;如果出现错误，
+可以使用sqlite3_errmsg() 或者 sqlite3_errmsg16()来获取错误的英文说明。需要主要的是，
+不管是否连接成功，当不再需要数据库连接时，与连接数据库操作的资源都应该通过sqlite3_close()来释放。
+
+其中 sqlite3_open_v2比另外两个多出的两个参数可以对所建立的连接进行额外的操作。
+例如flags可以取SQLITE_OPEN_READONLY,SQLITE_OPEN_READWRITE,SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE 三个值，并且可以和SQLITE_OPEN_NOMUTEX,
+ SQLITE_OPEN_FULLMUTEX, SQLITE_OPEN_SHAREDCACHE, SQLITE_OPEN_PRIVATECACHE, 
+ SQLITE_OPEN_URI 共同使用（通过或、交（|,&)运算来操作）；zVfs是与操作系统的接口，取NULL则为程序默认。
+####2.数据库查询
+此处以`sqlite3_prepare_v2`为例：
+    :::c
+    int sqlite3_prepare_v2(
+    	sqlite3 *db,            /* Database handle */
+    	const char *zSql,       /* SQL statement, UTF-8 encoded */
+	  	int nByte,              /* Maximum length of zSql in bytes. */
+	  	sqlite3_stmt **ppStmt,  /* OUT: Statement handle */
+	  	const char **pzTail     /* OUT: Pointer to unused portion of zSql */
+	);
+其中 *db即为上一步获取的*ppDb，zSql是将要编译的SQL查询语句，**ppStmt为操作处理。
+
+当执行prepare后，需要执行一次或多次 
+	
+	int sqlite_step(sqlite2_stmt*);
+来读取数据。
+通过执行
+    :::c
+    int sqlite3_column_count(sqlite3_stmt *pStmt);
+可以查出总共查询到数据表的列数。
+
+
+然后再执行spatialite中针对空间数据BLOB的方法来操作BLOB中的数据，下文再详细解释，先看代码：
+
+    :::c
+    spatialite_init(0);
+    ret = sqlite3_open_v2(argv[1],&handle,SQLITE_OPEN_READONLY,NULL);
+    if(ret != SQLITE_OK)
+    { //ERROR HERE }
+    sql = "SELECT * FROM mytable"
+    ret = sqlite2_prepare_v2(handle,sql,strlen(sql),&stmt,NULL);
+    if(ret != SQLITE_OK)
+    { //ERROR HERE }
+    n_columns = sqlite3_column_count(stmt);
+    while(true)
+    {
+      ret = sqlite3_step (stmt);
+      if (ret == SQLITE_DONE)
+        break;
+      if (ret == SQLITE_ROW)
+      {
+      	row_no++;
+      	printf ("row #%d\n", row_no);
+      }
+      for (ic = 0; ic < n_columns; ic++)
+      {
+        printf ("\t%-10s = ",sqlite3_column_name (stmt, ic));
+        switch (sqlite3_column_type (stmt, ic))
+        {
+      	case SQLITE_INTEGER:
+      		printf ("%d", sqlite3_column_int (stmt, ic));
+      		break;
+      	case SQLITE_BLOB:
+      	  blob = sqlite3_column_blob (stmt, ic);
+      	  blob_size = sqlite3_column_bytes (stmt, ic);
+
+          geom = gaiaFromSpatiaLiteBlobWkb (blob,blob_size);
+       	  if (!geom)
+           	printf ("BLOB [%d bytes]", blob_size);
+          else
+          {
+            geom_type = gaiaGeometryType (geom);
+            if (geom_type == GAIA_UNKNOWN)
+              printf ("EMPTY or NULL GEOMETRY");
+            else
+            {
+          	  char *geom_name;
+              if (geom_type == GAIA_POINT)
+          	    geom_name = "POINT";               
+              if (geom_type == GAIA_POLYGON)
+                geom_name = "POLYGON";
+                printf ("%s SRID=%d", geom_name,geom->Srid);
+              if (geom_type == GAIA_POLYGON ||geom_type ==GAIA_MULTIPOLYGON)
+              {
+                gaiaGeomCollArea (geom, &measure);
+                printf (" area=%1.2lf", measure);
+              }
+            }
+            gaiaFreeGeomColl (geom);
+          }
+            break;
+        }
+    }
+
+以上代码在列属性上只列出了两个case:Integer和BLOB，Geometry类型也只列出Point和Polygon，
+更具体的参见[sqlite c API](http://www.sqlite.org/c3ref/funclist.html)和
+[spatialite c API](http://www.gaia-gis.it/spatialite/spatialite-C-API-2.3.1.html)。
+
+此处解释上边代码中遇到的几个spatialite函数。
+首先就是读取出BLOB数据：
+	const void * blob;
+	blob = sqlite3_column_blob (stmt, ic);`
+
+然后通过spatialite的方法读取为空间处理数据（以gaia开头的函数都是spatialite的方法，而以sqlite开通的为sqlite的方法，spatialite是sqlite的扩展即体现在此处)。
+
+	gaiaGeomCollPtr geom;
+	geom = gaiaFromSpatiaLiteBlobWkb (blob,blob_size);
+gaiaGeomCollPtr的定义如下：
+	:::c
+	typedef struct gaiaGeomCollStruct {
+		int Srid;
+		gaiaPointPtr FirstPoint;
+		gaiaLinestringPtr FirstLinestring;
+		gaiaPolygonPtr FirstPolygon;
+		double MinX;
+		double MinY;
+		double MaxX;
+		double MaxY;
+	} gaiaGeomColl;
+	typedef gaiaGeomColl * gaiaGeomCollPtr;
+可见，gaiaGeomCollPtr 是指针形式，且其数据项包括该地理数据的MBR(Minimum Bounding Rectangle 最小外接矩形)。
+
+
+gaiaFromSpatiaLiteBlobWkb函数的第一个参数是`const unsigned char * blob_wkb`,而WKB(Well Known Binary)
+即为我们从数据库中读取的BLOB格式的数据。也就是说sqlite是将空间数据转换成WKB后存储。
+
+代码后边的`gaiaGeometryType gaiaGeomCollArea`等方法在此不赘述，详见
+[spatialite c API](http://www.gaia-gis.it/spatialite/spatialite-C-API-2.3.1.html)。
+
+
+
+Powered by [Engin](/about) & toto
