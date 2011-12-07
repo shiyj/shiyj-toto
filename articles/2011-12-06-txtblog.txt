@@ -1,0 +1,98 @@
+--- 
+title: ruby实现的文本博客引擎构建
+date: 06/12/2011
+slug: txtblog
+author: 史英建
+tags: ruby 文本博客引擎 toto
+
+
+本博客使用的是一个叫toto的文本博客引擎,
+toto采用文本而不是数据库来存储数据,这样就省去数据库的开销,
+完全使用静态文件渲染的方法来构建网站,
+很适合挂在heroku中的免费项目下.
+
+本文是我研究toto代码并修改、实现的过程,暂时称之为txtblog.
+
+###1.先运行起来!
+rack是一个标准的Ruby网络服务运行接口(a modular Ruby webserver interface),
+我们就用它来构建网站的第一步:
+
+要使rack运行起来,只需要一个包含call方法的类,在其中引入rack的requset和response就可以了.
+如下为第一步:
+
+	:::ruby
+	#/home/myhome/v1/txtblog.rb
+	class Server
+		def call env
+			@request  = Rack::Request.new env
+			@response = Rack::Response.new
+			body = ["<h1>hello world</h1>","<h2>This is a simple website.</h2>"]
+			@response.body= body
+			@response['Content-Type']   = Rack::Mime.mime_type(".html")
+			@response['Cache-Control'] = "no-cache, must-revalidate"
+			@response.status = 200
+			@response.finish
+		end
+	end
+
+然后定义config.ru内容
+	:::ruby
+	#/home/myhome/v1/config.ru	
+	require './txtblog'
+	use Rack::ShowExceptions
+	myserver = Server.new
+	run myserver
+接着在当前目录(config.ru所在目录)下运行 `thin start -p 3001`,
+在浏览器中打开 <http://localhost:3001> 即可看到返回的内容.
+
+以上即为一个简单的Web服务器,接下来我们希望能够读取出文件的内容来替换txtblog.rb中定义的body.
+
+###2.读取网站模板
+
+为了便于控制我们将第一步中txtblog.rb中的Server类放在叫Txtblog的module中,
+然后再在Txtblog中定义一个Site类来读取网站模板,并在Server类中引用它.
+	:::ruby
+	module Txtblog
+		class Site
+			def index
+				title = "Index"
+				ERB.new(File.read("templates/layout.rhtml")).result(binding)
+			end
+		end
+		class Server
+		def initialize
+			@site = Txtblog::Site.new
+		end
+		def call env
+			@request  = Rack::Request.new env
+			@response = Rack::Response.new
+			#body = ["<h1>hello world</h1>","<h2>This is a simple website.</h2>"]
+			body = []
+			body << @site.index
+			@response.body= body
+			@response['Content-Type']   = Rack::Mime.mime_type(".html")
+			@response['Cache-Control'] = "no-cache, must-revalidate"
+			@response.status = 200
+			@response.finish
+		end
+	end
+	end
+
+这样,我们就成功地读取出来Erb文件中的内容并向其中内嵌的title变量赋值,
+运行`thin start -p 3001`即可看到读取出来的结果.
+
+这里需要补充的是如果所读取的erb文件中包含静态的如css、javascript、图片,
+需要在config.ru中引用rack的Static来设置网站的根目录.
+下边的这段代码表示将public文件夹设置为根目录,其下的css,js,images文件夹为可访问目录.
+
+	:::ruby
+	use Rack::Static, :urls => ['/css', '/js', '/images','/favicon.ico'], :root => 'public'
+
+例如:如果要引用css文件夹内的app.css,
+只需指明路径 /css/app.css即可,而不是/public/css/app.css.
+	
+###3.加载markdown
+
+
+
+Powered by [Engin](/about) & toto

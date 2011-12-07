@@ -1,0 +1,64 @@
+--- 
+title: spatialite c samples 解析（2）
+date: 04/11/2011
+slug: spatialitecsample2
+author: 史英建
+tags: spatialite
+
+---
+##spatialite c samples 解析（2）
+---
+
+###1.在程序中使用spatialite数据类型。
+
+gaiaAllocGeomColl函数可以分配一个空间数据类型.
+	gaiaGeomCollPtr geo;
+	geo=gaiaAllocGeomColl();
+然后再将空间数据写入到该变量中,通过执行下边函数即可:
+	gaiaAddPointToGeomColl (geo, 1.5, 2.75);
+当然也有gaiaAddLinestringToGeomColl,gaiaAddPolygonToGeomColl来分别对应点,线,面.
+所不同的是线和面的分配方法稍微复杂些,函数的定义如下:
+	:::c
+	void gaiaAddPointToGeomColl( gaiaGeomCollPtr p , double x , double y );
+	gaiaLinestringPtr gaiaAddLinestringToGeomColl ( gaiaGeomCollPtr p , int points);
+	gaiaPolygonPtr gaiaAddPolygonToGeomColl (gaiaGeomCollPtr p, int points, int num_interiors);
+后两者都有对应该类型的返回值.
+所以线的操做如下:
+	:::c
+	gaiaLinestringPtr line;
+	line = gaiaAddLinestringToGeomColl (geo_ln, 5);
+	gaiaSetPoint (line->Coords, 0, 1.0, 1.0);
+	gaiaSetPoint (line->Coords, 1, 2.0, 1.0);
+	gaiaSetPoint (line->Coords, 2, 2.0, 2.0);
+	gaiaSetPoint (line->Coords, 3, 100.0, 2.0);
+	gaiaSetPoint (line->Coords, 4, 100.0, 100.0);
+需要注意的是line,它是geo_ln的一个成员,可以指向geo_ln,从gaiaGeomCollPtr的定义可以看出:
+	:::c
+	typedef struct gaiaGeomCollStruct {
+		int Srid;
+		gaiaPointPtr FirstPoint;
+		gaiaLinestringPtr FirstLinestring;
+		gaiaPolygonPtr FirstPolygon;
+		double MinX;
+		double MinY;
+		double MaxX;
+		double MaxY;
+	}gaiaGeomColl;
+	typedef gaiaGeomColl * gaiaGeomCollPtr;
+真正的数据是存储在 FirstLinestring所指向的内存空间.
+	:::c
+	typedef struct gaiaLinestringStruct {
+		int Points;
+		double * Coords;
+		double MinX;
+		double MinY;
+		double MaxX;
+		double MaxY;
+		struct gaiaLinestringStruct * Next;
+	}gaiaLinestring;
+	typedef gaiaLinestring * gaiaLinestringPtr;
+
+面的操作与之类似.
+	
+
+Powered by [Engin](/about) & toto

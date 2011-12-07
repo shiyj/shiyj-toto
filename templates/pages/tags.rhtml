@@ -5,12 +5,18 @@
   <div class="block_body body">
     <ul class="tag_cloud">
       <% if tags.length > 0 %>
-    <% tags.each do |tag| %>
-      <li class="tag">
-        <a href="/tag/<%=tag%>"><%= tag %></a>
-      </li>
-    <% end %>
-  <% end %>
+        <% flag = 1 %>
+        <% tags.each_with_index do |e,i| %>
+          <% if e != tags[i+1] %>
+            <li class="tag">
+            <a href="/tag/<%=i%>"><%= e+ "(#{flag})"%></a>
+            </li>
+            <% flag = 1 %>
+            <% next %>
+          <% end %>
+          <% flag += 1 %>
+        <% end %>
+      <% end %>
     </ul>
     <div class="clearfix"></div>
   </div>

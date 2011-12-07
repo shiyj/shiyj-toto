@@ -5,7 +5,7 @@ slug: compilespatialite
 author: 史英建
 tags: GIS spatialite
 
-##编译spatialite—GIS
+##编译spatialite-GIS
 
 
 在ubuntugis包中的libspatialite-dev使用的是2.4.0-rc4-2，然而如果要编译

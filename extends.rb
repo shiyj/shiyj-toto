@@ -1,3 +1,4 @@
+# encoding: utf-8
 module Toto
 	class Article < Hash
 		include Template
@@ -22,22 +23,29 @@ module Toto
 	end
 	
 	class Site
-		def tags type = :html
+		def initialize config
+			@config = config
 			entries = ! self.articles.empty? ?
         self.articles.reverse.map do |article|
           Article.new article, @config
         end : []
-      t = []
+			@config[:tags]=[]
       entries.each do |entry|
-      	 entry.tags.each{|tag| t << tag}
+      	 entry.tags.each{|tag| @config[:tags] << tag}
       end
-			return :tags => Tags.new(t, @config)
+			@config[:tags].sort!
+		end
+
+		def tags type = :html
+			return :tags => Tags.new(@config[:tags], @config)
     end
     
     def tag (name, type = :html)
+      tag= @config[:tags][name.to_i]? @config[:tags][name.to_i] : "others"
     	entries = ! self.articles.empty??
         self.articles.select do |a|
-          Article.new(a, @config).tags.include?(name)
+          Article.new(a, @config).tags.include?(tag)
+          #Article.new(a,@config)
         end.reverse.map do |article|
           Article.new article, @config
         end : []

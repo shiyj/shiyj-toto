@@ -19,7 +19,7 @@ task :new do
   hash.each{|key,value| article << ("#{key}: #{value}\n")}
   #article = {'title' => '','author'=>'史英建', 'date' => Time.now.strftime("%d/%m/%Y")}.to_yaml
   article << "\n"
-  article << "---\n###{title}\n---\n\n\n\n"
+  #article << "---\n###{title}\n---\n\n\n\n"
   article << "Powered by [Engin](/about) & toto"
 
   path = "#{Toto::Paths[:articles]}/#{Time.now.strftime("%Y-%m-%d")}#{'-' + slug if slug}.#{@config[:ext]}"

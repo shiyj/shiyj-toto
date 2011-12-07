@@ -8,7 +8,7 @@ require 'rack/codehighlighter'
 CodeRay::Encoders["html"]::DEFAULT_OPTIONS[:line_numbers]=:inline
 use Rack::Codehighlighter, :coderay, :element => "pre>code", :pattern => /\A:::(\w+)\s*\n/
 # Rack config
-use Rack::Static, :urls => ['/css', '/js', '/images', '/favicon.ico'], :root => 'public'
+use Rack::Static, :urls => ['/css', '/js', '/images', '/file','/favicon.ico'], :root => 'public'
 use Rack::CommonLogger
 
 if ENV['RACK_ENV'] == 'development'
@@ -32,8 +32,8 @@ toto = Toto::Server.new do
   #set :summary,   :max => 150, :delim => /~/                # length of article summary and delimiter
   #set :ext,       'txt'                                     # file extension for articles
   #set :cache,      28800                                    # cache duration, in seconds
-
   set :date, lambda {|now| now.strftime("%B #{now.day.ordinal} %Y") }
+  set :tags, []
 end
 
 run toto

@@ -83,6 +83,7 @@ tags: ubuntu
 
 ###9 wine中文配置
 
+###10 PostgreSQL与pgAdmin III 配置
 
 
 

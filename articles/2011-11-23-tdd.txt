@@ -1,0 +1,165 @@
+--- 
+title: ruby的测试驱动开发实例
+date: 23/11/2011
+slug: tdd
+author: 史英建
+tags: TDD 测试驱动 Ruby
+
+---
+##ruby的测试驱动开发实例
+---
+
+Ruby被称为"敏捷"的语言,在开发中采用测试驱动会更加**高效**并且充满**乐趣**.
+
+####高效
+刚接触Ruby时感觉它很难"控制",并且可能是出于某种心理原因,总想在动态语言中找出自己熟悉的如C/C++等在语言、IDE方面相似的内容，
+不然就会很"惶恐"。这之中最明显的不适应是没有用的顺手的调试工具。
+
+将"调试"和"测试"相提并论我不知道是否合适，我觉得TDD在RUBY上的"高效"就和我们平时使用VC、Eclipse等IDE的调试一样，
+但更人性化、更可控、更易见易理解。
+
+####乐趣
+
+* 每个模块的完成都有"分摊"的成就感，而这是1+1>2的……
+* 不管失败还是成功，或者是重构时粗心大意，我都知道程序还在我的控制之中
+
+###TDD之旅
+下面就一个具体的小例子来开始我们的TDD之旅.
+
+这个例子要从服务器通过http的request得到类似下列的字符串：
+
+	Linux 59
+	Windows 46
+	MacOS 53
+
+其中每一行有两个元素：一个字符串和随机数字。返回到客户端是"Linux 59\nWindows 46\nMacOS 53\n"这样一个字符串。
+
+服务器端的实现很简单，我比较喜欢Node.js,但这不是本文重点，就只贴出其代码，有兴趣可以查看相关资料。
+代码如下：
+	:::javascript
+	var http = require("http");
+
+	http.createServer(function(request, response) {
+		response.writeHead(200, {"Content-Type": "text/plain"});
+
+		var arr = ['Linux','Windows','MacOS'];
+		var outputString="";
+
+		for(var i=0;i<3;i++){ 
+			var numInput = 100;
+			var numOutput = new Number(Math.random() * numInput).toFixed(0);
+			outputString +=arr[i]+' '+numOutput+'\n';
+		}
+
+		response.write(outputString);
+		response.end();
+	}).listen(8080);
+
+	console.log("Random Number Generator Running...");
+	console.log('http://localhost:8080');
+
+我们要做的是
+
+* 从服务器读取出字符串
+* 将字符串按行读出，放入数组
+* 将每一行重新组合在一个hash表中，key值有:name,:num,:is_even.
+* 根据每行的那个随机数将其从大到小排列
+* 判断随机数是否是偶数
+
+最终显示结果为（包括了排序和判断偶数）：
+	[{:name=>"Linux", :num=>59, :is_even=>false}, 
+	 {:name=>"MacOS", :num=>53, :is_even=>false},
+	 {:name=>"Windows", :num=>46, :is_even=>true}]
+
+
+TDD的基本思想是在开发功能代码之前先编写测试代码.也即先思考如何测试,并编写测试代码,然后再思考实现这些测试的方法.
+关于TDD的介绍网上很多,百度百科里介绍的也比较全面,而我们只看实践：
+首先我们把我们要实现的东西给写出来：
+	:::ruby
+	#/home/myhome/mytdd.rb
+	require 'open-uri'
+
+	url = 'http://localhost:8080'
+	page = open(url).read
+	p sort_text page
+以上代码前部分是向服务器http://localhost:8080发送请求并取得数据，
+open-uri是一个可以发送http请求的库，其open函数表示打开response返回的值。
+我们关注的重点是在 `sort_text` 这个方法上。
+很明显，我希望能够通过 `sort_text`将充服务器读取出来的数据按照我们预想的用hash数组来排序并判断偶数。
+但是下一步不是去实现这个函数，别忘了我们是“**测试**驱动开发“。
+先写下测试代码再说：
+	:::ruby
+	#/home/myhome/mytdd-tests.rb
+	require 'test/unit'
+	require './mytdd'
+
+	class MytddTests < Test::Unit::TestCase
+		def test_sort_text
+		  assert_equal([{:name=>'Linux',:num=>50,:is_even=>true},
+		               {:name=>'Windows', :num=>20, :is_even=>true}],
+		               sort_text("Windows 20\nLinux 50\n"))
+		end
+	end
+然后运行 `ruby mytdd-tests.rb`,得到如下提示：
+	in `<top (required)>': undefined method `sort_text' for main:Object (NoMethodError)
+		from <internal:lib/rubygems/custom_require>:29:in `require'
+		from <internal:lib/rubygems/custom_require>:29:in `require'
+		from mytdd-test.rb:2:in `<main>'
+这个错误是必然的，我们还没有实现sort_text自然无法找到这个方法了。
+虽然这个流程貌似没有多少"实际"意义,但这正是TDD精义的体现.ruby在web上有一个很优美的框架叫Rails,
+我感觉这个名字能够很好地解释TDD(尽管Rails并不是TDD的专属).简而言之,TDD为编程铺设了"**轨道**",
+我们的程序就是运行在这个轨道上的列车.虽然偶尔会发生"不管你信不信反正我是信了"的奇迹,
+但这个轨道确实能让我们对程序的运行路线有很强的控制.
+
+我们先让测试通过再说,它不是提示没有这个函数吗?没关系,我们在mytdd.rb中定义一个:
+	:::ruby
+	def sort_text text
+	end
+
+等等,怎么什么都没做?!
+
+不是,我们起码让测试可以运行了:
+	nil
+	Loaded suite mytdd-test
+	Started
+	F
+	Finished in 0.001084 seconds.
+
+		1) Failure:
+	test_sort_text(MytddTests) [v2-test.rb:7]:
+	<[{:name=>"Linux", :num=>50, :is_even=>true},
+	 {:name=>"Windows", :num=>20, :is_even=>true}]> expected but was
+	<nil>.
+
+	1 tests, 1 assertions, 1 failures, 0 errors, 0 skips
+
+	Test run options: --seed 53447
+注意:测试失败和测试运行错误是两回事!!!
+测试失败表示我们写的功能出错,测试运行错误则是代码有语法错误.
+
+这个测试Failure提示我们:测试期望的结果是一个带hash的数组,而我们实际得到的却是一个nil值.
+
+这样的结果很容易理解,因为我们在mytdd.rb中定义的sort_text方法根本什么都没做,自然返回的是nil值.
+下边重要到实现阶段了.我希望通过三个函数来实现读取数组、构建hash和排序,所以在sort_text中我使用了三个方法:
+	:::ruby
+	def sort_text text
+		arr=read_in_arr text
+		arr_hash=read_in_hash arr
+		result=sort_arr_hash arr_hash
+	end
+然后就是测试，重复上边的步骤：
+
+* 构建测试代码和数据
+* 运行测试，有错误，提示找不到方法
+* 作出三个没有具体实现的方法
+* 运行测试，无错误，但提示测试用例失败
+* 实现这三个方法
+* 再运行测试
+
+整个过程的[源代码](/file/mytdd.tar.gz)
+
+但这并不是TDD的全部。TDD还有一个重要的环节：重构Refactor。
+
+####重构Refactor
+
+Powered by [Engin](/about) & toto

@@ -1,0 +1,141 @@
+--- 
+title: spatialite c samples 解析（3）
+date: 16/11/2011
+slug: spatialitecsample3
+author: 史英建
+tags: spatialite
+
+---
+##spatialite c samples 解析（3）
+---
+
+###1.创建空间数据库
+创建数据库和打开数据库使用同样的函数,只不过将参数改为可读写且能够创建(即不存在时可以重新创建一个数据库文件):
+	:::c
+	ret = sqlite3_open_v2 (argv[1], &handle,SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+####1.1初始化空间要素
+spatialite提供一种初始化空间元数据的方法,执行下列语句即可:
+	:::sql
+	SELECT InitSpatialMetadata();
+通过该方法创建的数据库表如下:
+
+![树状结构表](/images/spatialite/inittree.png)
+
+其执行的函数可以通过master中的内容看出:
+
+![master图](/images/spatialite/initmaster.png)
+
+上图表示执行"SELECT InitSpatialMetadata();"后所进行的操作包括:
+
+
+* 创建spatial_ref_sys表及其触发(trigger)规则;
+* 创建geometry_columns表及其触发规则,并为之创建索引;
+* 创建geom_cols_ref_sys视图.
+
+解释下触发(trigger)的含义及其在空间数据库中的作用.
+
+触发即在执行数据库操作时需要执行的规则,这个规则可以是在执行前或后.
+
+在此处的作用我们以具体的例子来说明:
+
+本例中总共创建了三个触发规则:fkd_refsys_geocols,fki_geocols_refsys,fku_geocols_refsys.
+触发名称的第三个字母分别表示:delete,insert和update,也就是说这三个触发是在执行删除、插入、更新时所触发的.
+我们以fki_geocols_refsys为例看看究竟是什么规则:
+
+	:::sql
+	CREATE TRIGGER fki_geocols_refsys BEFORE INSERT ON geometry_columns
+	FOR EACH ROW BEGIN
+	SELECT RAISE(ROLLBACK, 
+		'insert on table ''geometry_columns'' violates constraint: ''spatial_ref_sys.srid''')
+	WHERE  NEW."srid" IS NOT NULL
+	AND (SELECT srid FROM spatial_ref_sys WHERE srid = NEW.srid) IS NULL;
+	END
+很明显,这个触发器的意思是在向geometry_columns插入数据之前,如果新插入的数据中srid不是空,
+并且spatial_ref_sys表中不存在新插入数据的srid值,那么就抛出错误终止查询操作.
+
+
+通俗地讲,也就是说你向geometry_columns插入的srid值不是随便一个值,它必须是spatial_ref_sys中的一个.
+或者可以理解为geometry_columns表对spatial_ref_sys有依赖.
+
+
+关于初始化及触发的更多具体详细的细节请参考spatialite的教程文档.
+
+####1.2插入基本的数据项,并创建空间数据表.
+
+在上一步创建的数据表spatial_ref_sys是空间数据所必需依赖的,我们要为之插入一个初始值.
+
+	:::sql
+	INSERT INTO spatial_ref_sys 
+		(srid, auth_name, auth_srid, ref_sys_name, proj4text)
+		VALUES (3003, 'epsg', 3003, 'Monte Mario / Italy zone 1', 
+		'+proj=tmerc +lat_0=0 +lon_0=9 +k=0.9996 +x_0=1500000 +y_0=0 +ellps=intl +units=m +no_defs')
+然后创建一个存放空间数据的数据表test:
+
+	:::sql
+	CREATE TABLE test (PK INTEGER NOT NULL PRIMARY KEY)
+
+spatialite提供创建空间数据项的的方法AddGeometryColumn();我们创建一个点要素:
+	:::sql
+	SELECT AddGeometryColumn('test', 'geom', 3003, 'POINT', 2)
+此方法只是创建了两个触发规则:ggi_test_geom,ggu_test_geom,不再细述.
+
+###2.空间索引
+
+####2.1创建空间索引:
+spatialite提供两种索引方法:R-Tree和MbrCache.
+
+R-Tree:与我们平常所说的四叉树类似,但是对索引方法进行优化以适用空间数据的复杂性.具体表现在:1.尽可能包含多的目标,2.尽可能让矩形间少重叠.
+
+Mbrcache实际上并不是索引,只是将数据存储在内存中,加快了读取速度.
+
+
+#####2.1.1R-Tree空间索引:
+	:::sql
+	SELECT CreateSpatialIndex('test', 'geom')
+该方法在master中的操作如下图所述,与上文所讲方法类似:
+![空间索引](/images/spatialite/index.png)
+#####2.1.2MbrCache索引
+	:::sql
+	SELECT CreateMbrCache('test', 'geom')
+该方法在master中的操作如下图所述,与上文所讲方法类似:
+![mbrcache](/images/spatialite/mbrcache.png)
+
+####2.2空间查询
+空间索引只有在超大数据容量时才能显现其作用,我们先向其中插入**100万**个点数据.
+在不同的空间索引下插入的速度和数据库大小也是不同的:
+
+**没有构建索引直接插入: 34秒,70.5M**
+
+**R-Tree索引:        136秒,120.3M**
+
+**MbrCache索引:      47秒,70.5M**
+
+从数据库的大小就可以看出:R-Tree在数据库中**添加**了一些东西,从上图可以看出,
+Rtree添加了四个索引表idx_,而多出的50M容量就是建立的空间索引所占的容量.
+相比之下,MbrCache的内容就基本上和没有索引一样.
+
+至于**查询速度**,在有空间索引(无论R-Tree还是MbrCache)的情况下基本是0秒,
+无索引则多大27秒.
+
+#####普通的查询方法:
+	:::sql
+	SELECT Count(*) FROM test 
+		WHERE MbrWithin(geom, 
+			BuildMbr(1000400.5, 4000400.5,1000450.5, 4000450.5))
+#####R-Tree索引法:
+	:::sql
+	SELECT Count(*) FROM test 
+		WHERE MbrWithin(geom, BuildMbr(1000400.5, 4000400.5,1000450.5, 4000450.5))
+		AND ROWID IN ( SELECT pkid FROM idx_test_geom 
+										WHERE  xmin > 1000400.5 
+										AND xmax < 1000450.5 
+										AND ymin > 4000400.5 
+										AND ymax < 4000450.5)
+#####MbrCache法:
+	:::sql
+	SELECT Count(*) FROM test 
+		WHERE ROWID IN (SELECT rowid FROM cache_test_geom 
+			WHERE mbr = FilterMbrWithin(1000400.5,4000400.5,1000450.5,4000450.5))
+
+
+Powered by [Engin](/about) & toto

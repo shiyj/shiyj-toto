@@ -1,12 +1,12 @@
 --- 
-title: spatialite c samples 解析
+title: spatialite c samples 解析（1）
 date: 29/10/2011
 slug: spatialitecsample
 author: 史英建
 tags: spatialite
 
 ---
-##**spatialite c samples 解析**
+##**spatialite c samples 解析（1）**
 ---
 ####0.初始化spatialite扩展
 由于spatialite是基于sqlite的扩展，所以在使用sqlite查询之前要先将sqatilate初始化。
@@ -33,7 +33,7 @@ sqlite提供的连接数据库方法有三个：
 	);
 
 数据库连接被放在在 *ppDb内，其他的查询操作可以通过它来找到所连接数据库。如果连接成功那么函数返回SQLITE_OK;如果出现错误，
-可以使用sqlite3_errmsg() 或者 sqlite3_errmsg16()来获取错误的英文说明。需要主要的是，
+可以使用sqlite3_errmsg() 或者 sqlite3_errmsg16()来获取错误的英文说明。需要注意的是，
 不管是否连接成功，当不再需要数据库连接时，与连接数据库操作的资源都应该通过sqlite3_close()来释放。
 
 其中 sqlite3_open_v2比另外两个多出的两个参数可以对所建立的连接进行额外的操作。
@@ -64,65 +64,66 @@ sqlite提供的连接数据库方法有三个：
 
 然后再执行spatialite中针对空间数据BLOB的方法来操作BLOB中的数据，下文再详细解释，先看代码：
 
-    :::c
-    spatialite_init(0);
-    ret = sqlite3_open_v2(argv[1],&handle,SQLITE_OPEN_READONLY,NULL);
-    if(ret != SQLITE_OK)
-    { //ERROR HERE }
-    sql = "SELECT * FROM mytable"
-    ret = sqlite2_prepare_v2(handle,sql,strlen(sql),&stmt,NULL);
-    if(ret != SQLITE_OK)
-    { //ERROR HERE }
-    n_columns = sqlite3_column_count(stmt);
-    while(true)
-    {
-      ret = sqlite3_step (stmt);
-      if (ret == SQLITE_DONE)
-        break;
-      if (ret == SQLITE_ROW)
-      {
-      	row_no++;
-      	printf ("row #%d\n", row_no);
-      }
-      for (ic = 0; ic < n_columns; ic++)
-      {
-        printf ("\t%-10s = ",sqlite3_column_name (stmt, ic));
-        switch (sqlite3_column_type (stmt, ic))
-        {
-      	case SQLITE_INTEGER:
-      		printf ("%d", sqlite3_column_int (stmt, ic));
-      		break;
-      	case SQLITE_BLOB:
-      	  blob = sqlite3_column_blob (stmt, ic);
-      	  blob_size = sqlite3_column_bytes (stmt, ic);
-
-          geom = gaiaFromSpatiaLiteBlobWkb (blob,blob_size);
-       	  if (!geom)
-           	printf ("BLOB [%d bytes]", blob_size);
-          else
-          {
-            geom_type = gaiaGeometryType (geom);
-            if (geom_type == GAIA_UNKNOWN)
-              printf ("EMPTY or NULL GEOMETRY");
-            else
-            {
-          	  char *geom_name;
-              if (geom_type == GAIA_POINT)
-          	    geom_name = "POINT";               
-              if (geom_type == GAIA_POLYGON)
-                geom_name = "POLYGON";
-                printf ("%s SRID=%d", geom_name,geom->Srid);
-              if (geom_type == GAIA_POLYGON ||geom_type ==GAIA_MULTIPOLYGON)
-              {
-                gaiaGeomCollArea (geom, &measure);
-                printf (" area=%1.2lf", measure);
-              }
-            }
-            gaiaFreeGeomColl (geom);
-          }
-            break;
-        }
-    }
+	:::c
+	sqlite3 *handle;
+	sqlite3_stmt *stmt;
+	spatialite_init(0);
+	ret = sqlite3_open_v2(path,&handle,SQLITE_OPEN_READONLY,NULL);
+	if(ret != SQLITE_OK)
+	{ //ERROR HERE }
+	sql = "SELECT * FROM mytable"
+	ret = sqlite2_prepare_v2(handle,sql,strlen(sql),&stmt,NULL);
+	if(ret != SQLITE_OK)
+	{ //ERROR HERE }
+	n_columns = sqlite3_column_count(stmt);
+	while(true)
+	{
+		ret = sqlite3_step (stmt);
+		if (ret == SQLITE_DONE)
+			break;
+		if (ret == SQLITE_ROW)
+		{
+			row_no++;
+			printf ("row #%d\n", row_no);
+		}
+		for (ic = 0; ic < n_columns; ic++)
+		{
+			printf ("\t%-10s = ",sqlite3_column_name (stmt, ic));
+			switch (sqlite3_column_type (stmt, ic))
+			{
+				case SQLITE_INTEGER:
+				printf ("%d", sqlite3_column_int (stmt, ic));
+					break;
+				case SQLITE_BLOB:
+					blob = sqlite3_column_blob (stmt, ic);
+					blob_size = sqlite3_column_bytes (stmt, ic);
+					geom = gaiaFromSpatiaLiteBlobWkb (blob,blob_size);
+					if (!geom)
+						printf ("BLOB [%d bytes]", blob_size);
+					else
+					{
+						geom_type = gaiaGeometryType (geom);
+						if (geom_type == GAIA_UNKNOWN)
+							printf ("EMPTY or NULL GEOMETRY");
+						else
+						{
+							char *geom_name;
+							if (geom_type == GAIA_POINT)
+								geom_name = "POINT";               
+							if (geom_type == GAIA_POLYGON)
+								geom_name = "POLYGON";
+							printf ("%s SRID=%d", geom_name,geom->Srid);
+							if (geom_type == GAIA_POLYGON ||geom_type ==GAIA_MULTIPOLYGON)
+							{
+								gaiaGeomCollArea (geom, &measure);
+								printf (" area=%1.2lf", measure);
+							}
+						}
+						gaiaFreeGeomColl (geom);
+					}
+					break;
+				}
+	}
 
 以上代码在列属性上只列出了两个case:Integer和BLOB，Geometry类型也只列出Point和Polygon，
 更具体的参见[sqlite c API](http://www.sqlite.org/c3ref/funclist.html)和
