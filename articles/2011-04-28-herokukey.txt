@@ -5,12 +5,34 @@ title: heroku中添加公钥
 date: 28/04/2011
 tags: heroku github git
 
-总是遇到ssk出问题的事情如:
+重装系统或在更换ssh keys时总是遇到出问题的事情如:
     Permission denied (publickey)
 每次都重新生成阿啥的,结果忘记把keys给添加上.代码如下:
 
-    heroku keys
-留作提醒.
+	$ heroku keys:add
+	Found existing public key: /home/engin/.ssh/id_rsa.pub
+	Uploading SSH public key /home/engin/.ssh/id_rsa.pub
+
+
+heroku是通过ssh key来识别用户的。通过命令 `heroku keys`可以查看服务器中
+所存储的ssh key(前提是要已经登录).
+
+	$ heroku keys
+	=== 7 keys for shiyj.cn@gmail.com
+	ssh-rsa AAAAB3NzaC...se9DgABQ== engin@ubuntu
+	ssh-rsa AAAAB3NzaC...LtWF7aKw== engin@ubuntu
+	ssh-rsa AAAAB3NzaC...Fw8dkjDw== engin@ubuntu
+	ssh-rsa AAAAB3NzaC...+8n4FbDQ== shiyj.cn@gmail.com
+	ssh-rsa AAAAB3NzaC...F72T9zMQ== shiyj.cn@gmail.com
+	ssh-rsa AAAAB3NzaC...e0F+eigQ== shiyj.cn@gmail.com
+	ssh-rsa AAAAB3NzaC...S2CKfOtw== shiyj.cn@gmail.com
+
+
+如果以前的ssh key不使用了(比如电脑丢了),可以将其删除,使用命令
+
+	$ heroku keys:remove shiyj.cn@gmail.com
+	Key shiyj.cn@gmail.com removed.
+
 
 
 
