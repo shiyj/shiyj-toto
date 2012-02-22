@@ -1,0 +1,79 @@
+--- 
+title: codehighlighter里中文乱码问题
+date: 22/02/2012
+slug: codehighliterfix
+author: 史英建
+tags: codehighliter 中文乱码
+
+在toto博客中使用了 codehighliter 这个gem来表现代码部分到html格式.
+但是在代码中加入中文则出现乱码.
+
+本文介绍出现该问题到解决方法及我对该问题的追踪过程.
+
+###解决方法
+####1.新建一个mylib.rb文件,写入下列代码:
+	:::ruby
+	module Rack
+		class Codehighlighter
+		  include Rack::Utils
+		  def call(env)
+		    began_at = Time.now
+		    status, headers, response = @app.call(env)
+		    headers = HeaderHash.new(headers)
+
+		    if !STATUS_WITH_NO_ENTITY_BODY.include?(status) &&
+		       !headers['transfer-encoding'] &&
+		        headers['content-type'] &&
+		        headers['content-type'].include?("text/html")
+
+		      content = ""
+		      response.each { |part| content += part }
+		      doc = Nokogiri::HTML(content, nil, 'UTF-8')
+		      nodes = doc.search(@opts[:element])
+		      nodes.each do |node|
+		        s = node.inner_html || "[++where is the code?++]"
+		        if @opts[:markdown]
+		        	#原代码为node.parent.swap(s)
+		          node.parent.swap(Nokogiri::XML::DocumentFragment.new(doc,send(@highlighter, s)))
+		        else
+		        	#原代码为node.swap(s)
+		          node.swap(Nokogiri::XML::DocumentFragment.new(doc,send(@highlighter, s)))
+		        end
+		      end
+
+		      body = doc.to_html
+		      headers['content-length'] = bytesize(body).to_s
+
+		      log(env, status, headers, began_at) if @opts[:logging]
+		      [status, headers, [body]]
+		    else
+		      [status, headers, response]
+		    end
+		  end
+		end
+	end
+
+        
+####2.在config.ru中将刚刚添加到文件引用到其中然后就可以运行.
+
+	:::ruby
+	require './mylib'     #必须放在require 'rack/codehighlighter'之后
+	
+###过程及原因.
+codehighlighter 中引用了nokogiri,nokogiri是对html文件进行出来到一个类库,它是用c语言写成的.
+
+
+codehighlighter定义了解析格式,由nokogiri配合将markdown(或其他渲染)中这些格式转换成html标签和属性.
+
+
+但是 nokogiri 对解析中文字符串到解析有很多问题,并且这个问题用iconv貌似也解决不了.
+例如 codehighlighter 使用到的swap()就是这个问题.
+swap()在处理中文字符串时就无法解析,原因可能是起原生c代码到问题,但我懒得去看源代码,找不到究竟是什么原因.
+
+我在nokogiri的项目组提出了这个问题,有人告诉我swap在解析字符串时遇到的问题
+在Nokogiri::XML::DocumentFragment中就不会出现.
+详细可以看这里<https://github.com/tenderlove/nokogiri/issues/587>
+
+
+
+Powered by [Engin](/about) & toto
