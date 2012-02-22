@@ -1,0 +1,104 @@
+--- 
+title: phonegap plugin 的编写(android)
+date: 26/01/2012
+slug: phonegapplugin
+author: 史英建
+
+
+####Phonegap使用Javascript为不同移动开发提供了统一的接口,如调用本地GPS、摄像头、传感器等设备和本地存储等平台操作，但是如果我们想针对特殊的应用调用平台原生的代码库时如何制作插件呢？Phonegap为我们提供了编写平台原生代码的接口。
+
+###0.问题描述：
+>>在android平台上有一个java写的类库，如何通过phonegap调用到该类库中的数据。
+####java(HelloWorld.java)文件内容：
+	:::java
+	package com.test;
+	public class HelloWorld {
+		private String sayHello(String name){
+			return "hello world from: "+name;
+		}
+	}
+
+
+###1.修改原有java文件(HelloWorld.java)
+####1.1引入所需包
+首先必须在工程中添加phonegap.jar包，然后在HelloWorld.java中引入：
+	:::java
+	import com.phonegap.api.Plugin;
+	import com.phonegap.api.PluginResult;
+	import com.phonegap.api.PluginResult.Status;
+并让原有的类继承com.phonegap.api.Plugin类,
+此外还需要android中的org.json包中的部分内容.
+####1.2继承Plugin
+继承Plugin需要实现execute这个函数。
+最终修改完成的代码如下：
+	:::java
+	package com.plugin.test;
+
+	import org.json.JSONArray;
+	import org.json.JSONException;
+	import org.json.JSONObject;
+
+	import android.util.Log;
+
+	import com.phonegap.api.Plugin;
+	import com.phonegap.api.PluginResult;
+	import com.phonegap.api.PluginResult.Status;
+
+	public class HelloWorld extends Plugin {
+
+		public static final String ACTION ="hello";
+		@Override
+		public PluginResult execute(String action, JSONArray data, String callbackId) {
+			PluginResult result = null;
+			if(ACTION.equals(action)) {
+				try {
+					String name = data.getString(0);
+					JSONObject fileInfo = new JSONObject();
+					fileInfo.put("hello", sayHello(name));
+					result = new PluginResult(Status.OK,fileInfo); 
+				} catch (JSONException jsonEx) {
+					 Log.d("HelloWorldPlugin", "Got JSON Exception " + jsonEx.getMessage());
+				}
+			} else {
+				result = new PluginResult(Status.JSON_EXCEPTION);
+			}
+			return result;
+		}
+		private String sayHello(String name){
+			return "hello world from: "+name;
+		}
+	}
+###2.编写javascript接口
+javascript接口很简单，只需要按照PhoneGap的规范就可以了：
+	:::javascript
+	var  HelloWorld = {
+			hello: function(name,successCallback,failureCallback){
+				return PhoneGap.exec(successCallback,failureCallback,'HelloWorld','hello',[name]);
+			}
+	};
+将其保存为hello.js放在 assert/www/ 目录下。
+###3.将该插件增加到phonegap的插件组中
+在 res/xml/plugins.xml中的<plugins></plugins>标签内添加如下内容：
+	:::xml
+	<plugin name="HelloWorld" value="com.plugin.test.HelloWorld"/>
+###4.在页面中调用
+在主程序loadUrl的html文件中增加一个id=hello的button和id=result的div，并添加js调用代码：
+	:::html
+	<input disabled id = "hello" type="button" value="Hello" />
+	<hr>
+	<div id="result"></div>
+	<hr>
+	<script type="text/javascript">
+		document.addEventListener('deviceready',bindEv,true);
+			function bindEv(){
+				var btn = document.getElementById("hello");
+				btn.onclick = function() {
+					HelloWorld.hello("Shiyj",function(r){document.getElementById("result").innerHTML=r.hello},function(e){log(e)});
+				}
+				btn.disabled=false;
+			}
+	</script>
+###5.流程介绍：
+![流程介绍](/images/phonegap/phonegapplugin.png)
+
+Powered by [Engin](/about) & toto

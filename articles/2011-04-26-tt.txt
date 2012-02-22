@@ -31,15 +31,16 @@ url有点麻烦啊<http://www.google.com>
     * cb
         * cba
 
-    其实代码还有另一种写法(四个空格):
+其实代码还有另一种写法(四个空格):
 
-    abcdefghijklmn
+	abcdefghijklmn史英建
+
 ruby代码:
 
-    :::ruby
-    def a
-    #aaa
-    end
+	:::ruby
+	def a
+	#aaa中文
+	end
     
     
 <p>Use the <code>printf()</code> function.</p>

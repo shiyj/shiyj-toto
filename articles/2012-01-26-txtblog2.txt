@@ -1,0 +1,12 @@
+--- 
+title: ruby实现文本博客引擎构建(二)
+date: 26/01/2012
+slug: txtblog2
+author: 史英建
+tags: ruby 文本博客引擎 toto
+
+
+###4.配置路由
+
+
+Powered by [Engin](/about) & toto
