@@ -1,9 +1,11 @@
 # encoding: utf-8
 require 'toto'
 require './extends'
+
 # Syntax Highlighting
 require 'coderay'
 require 'rack/codehighlighter'
+require './mylib'
 
 CodeRay::Encoders["html"]::DEFAULT_OPTIONS[:line_numbers]=:inline
 use Rack::Codehighlighter, :coderay, :element => "pre>code", :pattern => /\A:::(\w+)\s*\n/
