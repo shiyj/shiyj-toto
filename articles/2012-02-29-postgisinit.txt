@@ -1,0 +1,89 @@
+--- 
+title: ubuntu 下 PostGIS 的配置.
+date: 29/02/2012
+slug: postgisinit
+author: 史英建
+tags: postgis
+
+###0.安装postgresql,并配置密码等.详细可以看这里<>
+###1.安装postgis.
+我的环境是ubuntu 10.04,安装的是postgresql-8.4.
+在新立得软件安装包中找到postgis和postgresql-8.4-postgis(不同的版本对应不同到包)这两个包,标记安装.
+安装完成后在postgresql-8.4-postgis这个包到属性里,"已安装的文件"选项卡下由这么几个重要到信息
+
+	/usr/share/postgresql/8.4/contrib/postgis-1.5/postgis.sql
+	/usr/share/postgresql/8.4/contrib/postgis-1.5/spatial_ref_sys.sql
+我们待会会用到它们.
+###2.配置空间数据库
+####2.1创建一个数据库
+* 首先进入postgresql到管理用户中   `su postgres`
+* 创建一个pg数据库:  `createdb geotemplate`
+* 然后进入这个数据库:  `psql geotemplate`
+* 创建一个数据表:  `create table test(id int,name varchar(25));`
+* 输入 `\q` 退出数据库
+* 输入 `createlang plpgsql geotemplate`
+* 导入postgis为数据库准备到空间插件postgis.sql和spatial_ref_sys.sql.首先进入所在到文件夹下:  `cd /usr/share/postgresql/8.4/contrib/postgis-1.5`
+	* 导入postgis功能函数:  `psql -d geotemplate  -f postgis.sql`
+	* 导入空间参照系:   `psql -d geotemplate  -f spatial_ref_sys.sql`
+
+然后进入geotemplate查看其中到内容(表中到内容解释看后续到介绍):
+
+	postgres@engin-laptop:~$ psql geotemplate
+	psql (8.4.10)
+	输入 "help" 来获取帮助信息.
+
+	geotemplate=# \d
+		                   关联列表
+	 架构模式 |       名称        |  型别  |  拥有者  
+	----------+-------------------+--------+----------
+	 public   | geography_columns | 视观表 | postgres
+	 public   | geometry_columns  | 资料表 | postgres
+	 public   | spatial_ref_sys   | 资料表 | postgres
+	 public   | test              | 资料表 | postgres
+	(4 行记录)
+
+	geotemplate=# \d geometry_columns
+		        资料表 "public.geometry_columns"
+		     栏位        |          型别          | 修饰词 
+	-------------------+------------------------+--------
+	 f_table_catalog   | character varying(256) | 非空
+	 f_table_schema    | character varying(256) | 非空
+	 f_table_name      | character varying(256) | 非空
+	 f_geometry_column | character varying(256) | 非空
+	 coord_dimension   | integer                | 非空
+	 srid              | integer                | 非空
+	 type              | character varying(30)  | 非空
+	索引：
+		  "geometry_columns_pk" PRIMARY KEY, btree (f_table_catalog, f_table_schema, f_table_name, f_geometry_column)
+
+	geotemplate=# \d spatial_ref_sys
+		     资料表 "public.spatial_ref_sys"
+		 栏位    |          型别           | 修饰词 
+	-----------+-------------------------+--------
+	 srid      | integer                 | 非空
+	 auth_name | character varying(256)  | 
+	 auth_srid | integer                 | 
+	 srtext    | character varying(2048) | 
+	 proj4text | character varying(2048) | 
+	索引：
+		  "spatial_ref_sys_pkey" PRIMARY KEY, btree (srid)
+
+####2.2增加空间数据列
+	geotemplate=# select AddGeometryColumn('test','location',4236,'POINT',2);
+	-[ RECORD 1 ]-----+--------------------------------------------------
+	addgeometrycolumn | public.test.location SRID:4236 TYPE:POINT DIMS:2 
+####2.3增加空间数据项
+	geotemplate=# insert into test(id,name,location) values
+	(1,'virtual place',GeomFromText('POINT(-10 10)',4236));
+	INSERT 0 1
+
+查询后如下(即将空间数据写入了其中并存储为二进制文件):
+
+	geotemplate=# select * from test;
+	-[ RECORD 1 ]------------------------------------------------
+	id       | 1
+	name     | virtual place
+	location | 01010000208C10000000000000000024C00000000000002440
+
+
+Powered by [Engin](/about) & toto
